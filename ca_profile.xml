@@ -1,0 +1,19 @@
+<CommunityApplications>
+  <!-- Required profile -->
+  <Profile>
+Libre WebUI is a privacy-first, self-hosted AI platform: chat with local models via Ollama or with cloud providers, plus agents, automations and a knowledge base.
+
+This repository hosts the Community Applications template for the single `libre-webui` container. Support is via GitHub issues on the main project until a dedicated forum support thread exists.
+  </Profile>
+  <!-- Optional icon -->
+  <Icon>https://raw.githubusercontent.com/libre-webui/libre-webui/main/frontend/public/icon-512.png</Icon>
+  <!-- Optional web page -->
+  <WebPage>https://librewebui.org</WebPage>
+  <!-- Optional support and donation links -->
+  <!-- No forum support thread exists yet; see README for the manual step to open one before submitting to CA -->
+  <!-- <Forum>https://forums.unraid.net/topic/YOUR_SUPPORT_TOPIC</Forum> -->
+  <!-- Optional donation link -->
+  <DonateLink>https://github.com/libre-webui/libre-webui</DonateLink>
+  <!-- Optional donation text -->
+  <DonateText>Star the project on GitHub</DonateText>
+</CommunityApplications>

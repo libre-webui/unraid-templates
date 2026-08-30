@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>libre-webui</Name>
+  <Repository>docker.io/librewebui/libre-webui:0.30.0</Repository>
+  <Registry>https://hub.docker.com/r/librewebui/libre-webui</Registry>
+  <Network>bridge</Network>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+
+  <Icon>https://raw.githubusercontent.com/libre-webui/libre-webui/main/frontend/public/icon-512.png</Icon>
+
+  <!-- NOTE: the port in a Config entry ALWAYS refers to the container port, not the host port -->
+  <WebUI>http://[IP]:[PORT:3001]</WebUI>
+
+  <Overview>Libre WebUI is a privacy-first, self-hosted AI platform: chat with local models through Ollama or with cloud providers, plus agents, automations and a knowledge base, all from a single container.&#xD;
+&#xD;
+Everything lives in your own data volume: chat history, uploads and keys never leave your server unless you point it at a cloud model provider yourself.&#xD;
+&#xD;
+On first run, open the WebUI and create the first account. That account automatically becomes the administrator. Further signups are disabled by default (ENABLE_SIGNUP=false) so random users on your network can't register themselves an account; change it in the template if you want an open signup page.&#xD;
+&#xD;
+Ollama is optional. Libre WebUI runs fine without it and can talk to cloud model providers configured from inside the app; point OLLAMA_BASE_URL at a reachable Ollama instance if you want local models.&#xD;
+&#xD;
+Note: the "Work" sandboxed task-container feature is not available in this packaging because it requires mounting the host Docker socket, which this template deliberately does not do. Everything else (chat, agents, automations, knowledge) works normally.&#xD;
+&#xD;
+Website: https://librewebui.org &#xD;
+Docs: https://docs.librewebui.org</Overview>
+
+  <Category>AI: Productivity:</Category>
+
+  <!-- NOTE: Either Support or Project is required by Community Applications; both are provided here -->
+  <Support>https://github.com/libre-webui/libre-webui/issues</Support>
+  <Project>https://github.com/libre-webui/libre-webui</Project>
+
+  <TemplateURL>https://raw.githubusercontent.com/libre-webui/unraid-templates/main/templates/libre-webui.xml</TemplateURL>
+
+  <DonateText>Star the project on GitHub</DonateText>
+  <DonateLink>https://github.com/libre-webui/libre-webui</DonateLink>
+
+  <Requires>Optional: a reachable Ollama instance for local models. Cloud model providers can be configured entirely from inside the app.</Requires>
+
+  <ExtraSearchTerms>chat llm ollama ai assistant agents automations knowledge</ExtraSearchTerms>
+
+  <!-- Same host-gateway alias the project's own docker-compose uses, so the
+       default OLLAMA_BASE_URL works without relying on template macros. -->
+  <ExtraParams>--add-host=host.docker.internal:host-gateway</ExtraParams>
+
+  <License>Apache-2.0</License>
+
+  <!-- Health check is baked into the image: wget spider http://localhost:3001/health/ready -->
+
+  <Config Name="WebUI Port" Target="3001" Default="8080" Mode="tcp" Description="Port for the Libre WebUI web interface, REST API and WebSocket (single port for everything). Change the host side (left) if 8080 is already used; do not change the container side (right)." Type="Port" Display="always" Required="true" Mask="false">8080</Config>
+
+  <Config Name="Data" Target="/app/backend/data" Default="/mnt/user/appdata/libre-webui/data" Mode="rw" Description="All persistent data: SQLite database, uploads and encryption keys. Back this up." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/libre-webui/data</Config>
+
+  <Config Name="Temp" Target="/app/backend/temp" Default="/mnt/user/appdata/libre-webui/temp" Mode="rw" Description="Scratch space used for temporary/preflight processing. Safe to clear; no need to back up." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/libre-webui/temp</Config>
+
+  <Config Name="JWT Secret" Target="JWT_SECRET" Default="" Mode="" Description="REQUIRED. A random 64-character hex secret used to sign login sessions. This app does not auto-generate one for store deployments, so you must set it yourself before starting the container, e.g. run `openssl rand -hex 32` on any Mac/Linux/WSL terminal and paste the result here. Changing it later logs everyone out." Type="Variable" Display="always" Required="true" Mask="true"></Config>
+
+  <Config Name="Ollama URL" Target="OLLAMA_BASE_URL" Default="http://host.docker.internal:11434" Mode="" Description="Base URL of an Ollama instance to use for local models. The default reaches Ollama running on the Unraid host itself or in a host-network container (an --add-host mapping is included, so it works out of the box). If you run Ollama in its own bridge-network container instead, replace this with that container's name (e.g. http://ollama:11434 if both are on the same custom Docker network) or the server's LAN IP. Entirely optional: leave as-is and just use cloud providers configured from inside the app if you don't run Ollama." Type="Variable" Display="always" Required="false" Mask="false">http://host.docker.internal:11434</Config>
+
+  <Config Name="Enable Signup" Target="ENABLE_SIGNUP" Default="false" Mode="" Description="Allow new users to self-register from the login page. The very first account created is always made administrator regardless of this setting. Leave false unless you want an open signup page on your network." Type="Variable" Display="always" Required="false" Mask="false">false</Config>
+
+  <Config Name="JWT Expiry" Target="JWT_EXPIRES_IN" Default="7d" Mode="" Description="How long a login session stays valid before requiring re-login, e.g. 7d, 24h." Type="Variable" Display="advanced" Required="false" Mask="false">7d</Config>
+
+  <Config Name="Encryption Key" Target="ENCRYPTION_KEY" Default="" Mode="" Description="Optional. Key used to encrypt stored provider credentials at rest. Leave empty to auto-generate one into the data volume on first boot." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+
+  <Config Name="CORS Origin" Target="CORS_ORIGIN" Default="*" Mode="" Description="Allowed CORS origin(s). Defaults to * because store/LAN installs are reached via mDNS names or bare IPs that a strict allowlist can't predict; authentication is JWT bearer tokens, not ambient cookies, so this does not weaken login security. Tighten it only if you front this with a reverse proxy on a fixed hostname." Type="Variable" Display="advanced-hide" Required="false" Mask="false">*</Config>
+
+  <Config Name="Node Environment" Target="NODE_ENV" Default="production" Mode="" Description="Do not change." Type="Variable" Display="advanced-hide" Required="true" Mask="false">production</Config>
+
+  <Config Name="Docker Environment Flag" Target="DOCKER_ENV" Default="true" Mode="" Description="Tells the app it is running in a container. Do not change." Type="Variable" Display="advanced-hide" Required="true" Mask="false">true</Config>
+
+  <Config Name="Internal Port" Target="PORT" Default="3001" Mode="" Description="Internal port the process listens on inside the container. Must stay 3001 and match the WebUI Port container-side value above. Do not change." Type="Variable" Display="advanced-hide" Required="true" Mask="false">3001</Config>
+
+  <Config Name="Data Directory" Target="DATA_DIR" Default="/app/backend/data" Mode="" Description="Internal path matching the Data volume mapping above. Do not change." Type="Variable" Display="advanced-hide" Required="true" Mask="false">/app/backend/data</Config>
+
+  <Config Name="Preflight Temp Directory" Target="PLATFORM_PREFLIGHT_TMP_DIR" Default="/app/backend/temp/preflight" Mode="" Description="Internal scratch path under the Temp volume mapping above. Do not change." Type="Variable" Display="advanced-hide" Required="true" Mask="false">/app/backend/temp/preflight</Config>
+
+</Container>
